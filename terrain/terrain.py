@@ -45,6 +45,7 @@ class Material(Enum):
 class Cell(object):
     def __init__(self, height, material, moisture=1):
         self.height = height
+
         self.material = material
         self.moisture = moisture
 
@@ -52,7 +53,7 @@ class Cell(object):
         return "Cell({}, {}, moisture={})".format(self.height, self.material.name, self.moisture)
 
     def json(self, max_height=None):
-        return [self.height/max_height if max_height else self.height, self.material.value]
+        return [self.height / max_height if max_height else self.height, self.material.value]
 
 
 class Layer(object):
@@ -77,11 +78,12 @@ class Layer(object):
 
 
 class Terrain(object):
-    def __init__(self, dimensions, moisture_seed=None, modifier=None):
+    def __init__(self, dimensions, water_level=None, moisture_seed=None, modifier=None):
         self.layers = []
         self.moisture_seed = moisture_seed or 0
 
         self.max_height = 0
+        self.water_level = water_level or 0
 
         self.modifiers = [modifier] if modifier else []
 
@@ -99,7 +101,8 @@ class Terrain(object):
 
     @classmethod
     def from_config(cls, config):
-        t = Terrain(config.get("dimensions", (1000, 1000)), moisture_seed=config.get("moisture_seed"))
+        t = Terrain(config.get("dimensions", (1000, 1000)),
+                    water_level=config.get("water_level"), moisture_seed=config.get("moisture_seed"))
 
         for layer in config["layers"]:
             t.add_layer(Layer(layer["seed"], layer["scale"], layer["height"]))
@@ -113,6 +116,8 @@ class Terrain(object):
             "moisture_seed": self.moisture_seed,
 
             "height": self.max_height,
+            "water_level": self.water_level,
+
             "dimensions": self.dimensions,
             "bounds": self.bounds
         }

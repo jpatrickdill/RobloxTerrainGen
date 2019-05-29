@@ -28,11 +28,12 @@ def get_chunk():
         n_row = []
 
         for cell in row:
-            n_row.append(cell.json(max_height=terr.max_height))
+            n_row.append(cell.json())
 
         json_chunk.append(n_row)
 
     return jsonify({
         "height": terr.max_height,
-        "data": json_chunk
+        "water_level": terr.water_level,
+        "chunk": json_chunk
     })

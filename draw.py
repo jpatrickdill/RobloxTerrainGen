@@ -1,35 +1,34 @@
-from terrain import Terrain
-from terrain.modifiers import circle_island
+import math
 
 from PIL import Image
 
-seed = 1
+from terrain import Terrain
+from terrain.modifiers import circle_island
+
+
+def octaves(seed, scale, height, octs):
+    layers = []
+
+    for o in range(octs):
+        layers.append({
+            "seed": seed,
+            "scale": scale / (2 ** o),
+            "height": math.ceil(height / (2 ** o))
+        })
+
+    return layers
+
 
 config = {
-    "layers": [
-        {
-            "seed": 1,
-            "scale": 500,
-            "height": 350
-        },
-        {
-            "seed": 34,
-            "scale": 100,
-            "height": 70
-        },
-        {
-            "seed": 66,
-            "scale": 33,
-            "height": 10
-        }
-    ],
+    "layers": octaves(6969, 750, 300, 12),
 
-    "dimensions": [2000, 2000],
+    "dimensions": [5000, 5000],
+    "water_level": 6
 
 }
 
 terr = Terrain.from_config(config)
-terr.add_modifier(circle_island())
+terr.add_modifier(circle_island(0.3, 1))
 
 img = Image.new("RGB", (500, 500))
 
@@ -37,9 +36,13 @@ pix = img.load()
 
 for x in range(0, 500):
     for y in range(0, 500):
-        alt = terr.get_pixel(x * 4 - 1000, y * 4 - 1000).height
+        alt = terr.get_pixel(x * 10 - 2500, y * 10 - 2500).height
 
-        pix[x, y] = (int((alt / terr.max_height) * 255),) * 3
+        if alt <= terr.water_level:
+            pix[x, y] = (0, 100, 255)
+
+        else:
+            pix[x, y] = (int((alt / terr.max_height) * 255),) * 3
 
     if x % 100 == 0:
         print(x)
