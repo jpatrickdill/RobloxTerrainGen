@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 import sys
+import json
 
 sys.path.append("./../../")
 
@@ -11,13 +12,13 @@ terrain_bp = Blueprint("terrain", __name__)
 
 @terrain_bp.route("/chunk")
 def get_chunk():
-    seed = int(request.args["seed"])
-    x0 = int(request.args["x0"])
-    y0 = int(request.args["y0"])
-    x1 = int(request.args["x1"])
-    y1 = int(request.args["y1"])
+    config = json.loads(request.args["config"])
 
-    terr = Terrain(seed, (2000, 2000), 256, modifier=circle_island())
+    x0, y0 = int(request.args["x0"]), int(request.args["y0"])
+    x1, y1 = int(request.args["x1"]), int(request.args["y1"])
+
+    terr = Terrain.from_config(config)
+    terr.add_modifier(circle_island())
 
     chunk = terr.get_chunk(x0, y0, x1, y1)
 
@@ -27,8 +28,11 @@ def get_chunk():
         n_row = []
 
         for cell in row:
-            n_row.append(cell.json())
+            n_row.append(cell.json(max_height=terr.max_height))
 
         json_chunk.append(n_row)
 
-    return jsonify(json_chunk)
+    return jsonify({
+        "height": terr.max_height,
+        "data": json_chunk
+    })

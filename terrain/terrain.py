@@ -51,30 +51,68 @@ class Cell(object):
     def __repr__(self):
         return "Cell({}, {}, moisture={})".format(self.height, self.material.name, self.moisture)
 
+    def json(self, max_height=None):
+        return [self.height/max_height if max_height else self.height, self.material.value]
+
+
+class Layer(object):
+    def __init__(self, seed, scale, height):
+        self.seed = seed
+        self.scale = scale
+        self.height = height
+
+        self.simplex = OpenSimplex(seed)
+
+    def get_pixel(self, x, y):
+        alt = (self.simplex.noise2d(x / self.scale, y / self.scale) + 1) / 2 * self.height
+
+        return alt
+
     def json(self):
-        return [self.height, self.material.value]
+        return {
+            "seed": self.seed,
+            "scale": self.scale,
+            "height": self.height
+        }
 
 
 class Terrain(object):
-    def __init__(self, seed, dimensions, height, moisture_seed=None, modifier=None):
-        self.seed = seed
-        self.moisture_seed = moisture_seed or seed
+    def __init__(self, dimensions, moisture_seed=None, modifier=None):
+        self.layers = []
+        self.moisture_seed = moisture_seed or 0
+
+        self.max_height = 0
 
         self.modifiers = [modifier] if modifier else []
 
         self.dimensions = dimensions
-        self.height = height
         self.bounds = [(-dimensions[0] / 2, -dimensions[1] / 2), (dimensions[0] / 2, dimensions[1] / 2)]
 
-        self.simplex = OpenSimplex(seed)
+    def add_layer(self, layer):
+        self.layers.append(layer)
+
+        max_height = 0
+        for layer in self.layers:
+            max_height += layer.height
+
+        self.max_height = max_height
+
+    @classmethod
+    def from_config(cls, config):
+        t = Terrain(config.get("dimensions", (1000, 1000)), moisture_seed=config.get("moisture_seed"))
+
+        for layer in config["layers"]:
+            t.add_layer(Layer(layer["seed"], layer["scale"], layer["height"]))
+
+        return t
 
     @property
     def config(self):
         return {
-            "seed": self.seed,
+            "layers": [layer.json() for layer in self.layers],
             "moisture_seed": self.moisture_seed,
 
-            "height": self.height,
+            "height": self.max_height,
             "dimensions": self.dimensions,
             "bounds": self.bounds
         }
@@ -83,10 +121,14 @@ class Terrain(object):
         self.modifiers.append(func)
 
     def get_pixel(self, x, y):
-        v = Cell((self.simplex.noise2d(x / 150, y / 150) + 1) / 2, Material.Ground)
+        alt = sum([layer.get_pixel(x, y) for layer in self.layers])
+
+        v = Cell(alt / self.max_height, Material.Ground)
 
         for func in self.modifiers:
             v = func(v, (x, y), self.config)
+
+        v.height = v.height * self.max_height
 
         return v
 
@@ -101,6 +143,3 @@ class Terrain(object):
             rows.append(row)
 
         return rows
-
-
-
