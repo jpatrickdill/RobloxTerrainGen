@@ -135,23 +135,27 @@ class Terrain(object):
 
         slope = math.sqrt((nx-height) ** 2 + (ny-height) ** 2)
 
-        altitude = height - self.water_level
-
-        mat = Material.Grass
-
-        if altitude <= 14:
-            mat = Material.Sand if slope <= 0.8 else Material.Sandstone
-        elif 6 <= altitude <= self.max_height*0.6-14:
-            mat = Material.Grass if slope <= 1.25 else Material.Rock
-        else:
-            mat = Material.Snow if slope <= 0.63 else Material.Rock
-
-        v = Cell(height / self.max_height, mat)
-
+        v = Cell(height / self.max_height, Material.Grass)
         for func in self.modifiers:
             v = func(v, (x, y), self.config)
 
+        # convert back to height in m
         v.height = v.height * self.max_height
+
+        altitude = v.height - self.water_level
+
+        # determine material
+
+        if altitude <= 6:  # beach
+            mat = Material.Sand if slope <= 0.8 else Material.Sandstone
+        elif 6 <= altitude <= self.max_height*0.6-14:  # grassy
+            mat = Material.Grass if slope <= 1.125 else Material.Rock
+        else:  # snow/mountain
+            mat = Material.Snow if slope <= 0.63 else Material.Rock
+
+        # initialize height as percentage for any modifier functions
+
+        v.material = mat
 
         return v
 
