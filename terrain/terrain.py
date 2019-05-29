@@ -1,5 +1,7 @@
-from opensimplex import OpenSimplex
+import math
 from enum import Enum
+
+from opensimplex import OpenSimplex
 
 
 class Material(Enum):
@@ -126,9 +128,25 @@ class Terrain(object):
         self.modifiers.append(func)
 
     def get_pixel(self, x, y):
-        alt = sum([layer.get_pixel(x, y) for layer in self.layers])
+        height = sum([layer.get_pixel(x, y) for layer in self.layers])
 
-        v = Cell(alt / self.max_height, Material.Ground)
+        nx = sum([layer.get_pixel(x + 1, y) for layer in self.layers])
+        ny = sum([layer.get_pixel(x, y + 1) for layer in self.layers])
+
+        slope = math.sqrt((nx-height) ** 2 + (ny-height) ** 2)
+
+        altitude = height - self.water_level
+
+        mat = Material.Grass
+
+        if altitude <= 14:
+            mat = Material.Sand if slope <= 0.8 else Material.Sandstone
+        elif 6 <= altitude <= self.max_height*0.6-14:
+            mat = Material.Grass if slope <= 1.25 else Material.Rock
+        else:
+            mat = Material.Snow if slope <= 0.63 else Material.Rock
+
+        v = Cell(height / self.max_height, mat)
 
         for func in self.modifiers:
             v = func(v, (x, y), self.config)

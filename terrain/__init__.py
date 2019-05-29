@@ -1,2 +1,2 @@
-from .terrain import Terrain
+from .terrain import Terrain, Material
 from . import modifiers
