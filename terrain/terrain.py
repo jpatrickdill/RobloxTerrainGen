@@ -1,4 +1,5 @@
 import math
+import os
 
 from opensimplex import OpenSimplex
 
@@ -25,7 +26,9 @@ BiomeMap = {
     (255, 255, 255): Snow
 }
 
-BiomeImg = Image.open("./terrain/biomes/biomes.png")
+dir_path = os.path.dirname(os.path.realpath(__file__))
+
+BiomeImg = Image.open(dir_path+"./biomes/biomes.png")
 BiomeImgPix = BiomeImg.load()
 
 
