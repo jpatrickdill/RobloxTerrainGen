@@ -3,6 +3,8 @@ from enum import Enum
 
 from opensimplex import OpenSimplex
 
+from terrain.biomes import beach, grassland, mountain
+
 
 class Material(Enum):
     Plastic = 256
@@ -133,7 +135,7 @@ class Terrain(object):
         nx = sum([layer.get_pixel(x + 1, y) for layer in self.layers])
         ny = sum([layer.get_pixel(x, y + 1) for layer in self.layers])
 
-        slope = math.sqrt((nx-height) ** 2 + (ny-height) ** 2)
+        slope = math.sqrt((nx - height) ** 2 + (ny - height) ** 2)
 
         v = Cell(height / self.max_height, Material.Grass)
         for func in self.modifiers:
@@ -148,7 +150,7 @@ class Terrain(object):
 
         if altitude <= 6:  # beach
             mat = Material.Sand if slope <= 0.8 else Material.Sandstone
-        elif 6 <= altitude <= self.max_height*0.6-14:  # grassy
+        elif 6 <= altitude <= self.max_height * 0.6 - 14:  # grassy
             mat = Material.Grass if slope <= 1.125 else Material.Rock
         else:  # snow/mountain
             mat = Material.Snow if slope <= 0.63 else Material.Rock
@@ -170,3 +172,23 @@ class Terrain(object):
             rows.append(row)
 
         return rows
+
+    def get_trees(self, x0, y0, x1, y1):
+        trees = []
+
+        # get trees from each biome type
+
+        for biome in [beach, grassland, mountain]:
+            for tree in biome.get_trees(x0, y0, x1, y1):
+                trees.append(tree)
+
+        i = 0
+        while i < len(trees):
+            tree = trees[i]
+
+            if tree.valid(self.get_pixel(tree.x, tree.y)):
+                i += 1
+            else:
+                del trees[i]
+
+        return trees

@@ -32,8 +32,13 @@ def get_chunk():
 
         json_chunk.append(n_row)
 
+    trees = terr.get_trees(x0, y0, x1, y1)
+
+    print(trees)
+
     return jsonify({
         "height": terr.max_height,
         "water_level": terr.water_level,
-        "chunk": json_chunk
+        "chunk": json_chunk,
+        "trees": [tree.json(terr.get_pixel(tree.x, tree.y)) for tree in trees]
     })
