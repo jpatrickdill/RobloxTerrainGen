@@ -57,7 +57,7 @@ class Cell(object):
 
     def json(self, max_height=None):
         return [self.height / max_height if max_height else self.height, self.material.value,
-                self.biome.__name__, self.moisture, self.position[0], self.position[1]]
+                self.biome.Name, self.moisture, self.position[0], self.position[1]]
 
 
 class Layer(object):

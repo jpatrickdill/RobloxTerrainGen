@@ -21,6 +21,8 @@ def get_positions(x0, y0, x1, y1, grid_size):
 
 
 class Biome(object):
+    Name = "Biome"
+
     def __init__(self):
         self.trees = []
 
@@ -35,6 +37,8 @@ class Biome(object):
 
 
 class Beach(Biome):
+    Name = "Beach"
+
     def material_at(self, cell, slope):
         return Material.Sand if slope <= 0.8 else Material.Sandstone
 
@@ -46,6 +50,8 @@ class Beach(Biome):
 
 
 class Grassland(Biome):
+    Name = "Grassland"
+
     def material_at(self, cell, slope):
         return Material.Grass if slope <= 0.93 else Material.Rock
 
@@ -57,6 +63,8 @@ class Grassland(Biome):
 
 
 class TemperateDeciduousForest(Biome):
+    Name = "Temp Forest"
+
     def material_at(self, cell, slope):
         return Material.Grass if slope <= 0.93 else Material.Rock
 
@@ -68,6 +76,8 @@ class TemperateDeciduousForest(Biome):
 
 
 class TemperateRainForest(Biome):
+    Name = "Temp Rain Forest"
+
     def material_at(self, cell, slope):
         return Material.Grass if slope <= 0.85 else Material.Rock
 
@@ -79,6 +89,8 @@ class TemperateRainForest(Biome):
 
 
 class TropicalRainForest(Biome):
+    Name = "Trop Rain Forest"
+
     def material_at(self, cell, slope):
         return Material.Grass if slope <= 0.7 else Material.Rock
 
@@ -90,6 +102,8 @@ class TropicalRainForest(Biome):
 
 
 class SeasonalForest(Biome):
+    Name = "Seasonal Forest"
+
     def material_at(self, cell, slope):
         return Material.Grass if slope <= 0.9 else Material.Rock
 
@@ -101,6 +115,8 @@ class SeasonalForest(Biome):
 
 
 class SubtropicalDesert(Biome):
+    Name = "Subtrop Desert"
+
     def material_at(self, cell, slope):
         return Material.Sand if slope <= 0.75 else Material.Sandstone
 
@@ -109,6 +125,8 @@ class SubtropicalDesert(Biome):
 
 
 class TemperateDesert(Biome):
+    Name = "Temp Desert"
+
     def material_at(self, cell, slope):
         return Material.Sand if slope <= 0.75 else Material.Sandstone
 
@@ -117,6 +135,8 @@ class TemperateDesert(Biome):
 
 
 class Shrubland(Biome):
+    Name = "Shrubland"
+
     def material_at(self, cell, slope):
         if slope <= 0.8:
             return Material.Grass
@@ -130,6 +150,8 @@ class Shrubland(Biome):
 
 
 class Taiga(Biome):
+    Name = "Taiga"
+
     def material_at(self, cell, slope):
         return Material.Grass if slope <= 1 else Material.Rock
 
@@ -141,6 +163,8 @@ class Taiga(Biome):
 
 
 class Snow(Biome):
+    Name = "Snow"
+
     def material_at(self, cell, slope):
         return Material.Snow if slope <= 0.7 else Material.Rock
 
@@ -149,6 +173,8 @@ class Snow(Biome):
 
 
 class Bare(Biome):
+    Name = "Bare"
+
     def material_at(self, cell, slope):
         return Material.Ground if slope < 0.7 else Material.Rock
 
