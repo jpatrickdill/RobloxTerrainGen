@@ -1,12 +1,17 @@
 import random
+import math
 
 from terrain.material import Material
 from terrain.biomes.util import get_cells_intersecting
-from terrain.tree import Oak, Palm, Redwood
+from terrain.tree import *
 
 
-def get_positions(x0, y0, x1, y1, grid_size):
-    random.seed((x0 << 16) + (y0 << 8) + grid_size)
+def dist(x0, y0, x1, y1):
+    return math.sqrt((x1 - x0) ** 2 + (y1 - y0) ** 2)
+
+
+def get_positions(x0, y0, x1, y1, grid_size, offset=None):
+    random.seed((x0 << 16) + (y0 << 8) + grid_size + hash(offset or 0))
 
     positions = []
 
@@ -27,7 +32,14 @@ class Biome(object):
         self.trees = []
 
     def add_tree(self, tree):
+        # check if tree is too close to any other trees
+        for tree2 in self.trees:
+            if dist(tree.x, tree.y, tree2.x, tree2.y) < (tree.diameter + tree2.diameter) / 2:
+                return False
+
         self.trees.append(tree)
+
+        return True
 
     def material_at(self, cell, slope):
         return Material.Grass
@@ -43,7 +55,7 @@ class Beach(Biome):
         return Material.Sand if slope <= 0.8 else Material.Sandstone
 
     def __call__(self, x0, y0, x1, y1):
-        for (x, y) in get_positions(x0, y0, x1, y1, 48):
+        for (x, y) in get_positions(x0, y0, x1, y1, 48, "palms"):
             self.add_tree(Palm(x, y))
 
         return self.trees
@@ -56,20 +68,26 @@ class Grassland(Biome):
         return Material.Grass if slope <= 0.93 else Material.Rock
 
     def __call__(self, x0, y0, x1, y1):
-        for (x, y) in get_positions(x0, y0, x1, y1, 86):
+        for (x, y) in get_positions(x0, y0, x1, y1, 136, "maples"):
+            self.add_tree(Maple(x, y))
+
+        for (x, y) in get_positions(x0, y0, x1, y1, 86, "oaks"):
             self.add_tree(Oak(x, y))
 
         return self.trees
 
 
 class TemperateDeciduousForest(Biome):
-    Name = "Temp Forest"
+    Name = "Temp Decid Forest"
 
     def material_at(self, cell, slope):
         return Material.Grass if slope <= 0.93 else Material.Rock
 
     def __call__(self, x0, y0, x1, y1):
-        for (x, y) in get_positions(x0, y0, x1, y1, 42):
+        for (x, y) in get_positions(x0, y0, x1, y1, 82, "maples"):
+            self.add_tree(Maple(x, y))
+
+        for (x, y) in get_positions(x0, y0, x1, y1, 36, "oaks"):
             self.add_tree(Oak(x, y))
 
         return self.trees
@@ -82,7 +100,7 @@ class TemperateRainForest(Biome):
         return Material.Grass if slope <= 0.85 else Material.Rock
 
     def __call__(self, x0, y0, x1, y1):
-        for (x, y) in get_positions(x0, y0, x1, y1, 34):
+        for (x, y) in get_positions(x0, y0, x1, y1, 34, "oaks"):
             self.add_tree(Oak(x, y))
 
         return self.trees
@@ -95,7 +113,7 @@ class TropicalRainForest(Biome):
         return Material.Grass if slope <= 0.7 else Material.Rock
 
     def __call__(self, x0, y0, x1, y1):
-        for (x, y) in get_positions(x0, y0, x1, y1, 22):
+        for (x, y) in get_positions(x0, y0, x1, y1, 22, "oaks"):
             self.add_tree(Oak(x, y))
 
         return self.trees
@@ -108,7 +126,7 @@ class SeasonalForest(Biome):
         return Material.Grass if slope <= 0.9 else Material.Rock
 
     def __call__(self, x0, y0, x1, y1):
-        for (x, y) in get_positions(x0, y0, x1, y1, 64):
+        for (x, y) in get_positions(x0, y0, x1, y1, 52, "oaks"):
             self.add_tree(Oak(x, y))
 
         return self.trees
@@ -121,6 +139,9 @@ class SubtropicalDesert(Biome):
         return Material.Sand if slope <= 0.75 else Material.Sandstone
 
     def __call__(self, x0, y0, x1, y1):
+        for (x, y) in get_positions(x0, y0, x1, y1, 48, "cacti"):
+            self.add_tree(Cactus(x, y))
+
         return self.trees
 
 
@@ -131,6 +152,9 @@ class TemperateDesert(Biome):
         return Material.Sand if slope <= 0.75 else Material.Sandstone
 
     def __call__(self, x0, y0, x1, y1):
+        for (x, y) in get_positions(x0, y0, x1, y1, 28, "cacti"):
+            self.add_tree(Cactus(x, y))
+
         return self.trees
 
 
@@ -156,8 +180,8 @@ class Taiga(Biome):
         return Material.Grass if slope <= 1 else Material.Rock
 
     def __call__(self, x0, y0, x1, y1):
-        for (x, y) in get_positions(x0, y0, x1, y1, 36):
-            self.add_tree(Redwood(x, y))
+        for (x, y) in get_positions(x0, y0, x1, y1, 28, "pines"):
+            self.add_tree(Pine(x, y))
 
         return self.trees
 
@@ -169,6 +193,9 @@ class Snow(Biome):
         return Material.Snow if slope <= 0.7 else Material.Rock
 
     def __call__(self, x0, y0, x1, y1):
+        for (x, y) in get_positions(x0, y0, x1, y1, 64, "pines"):
+            self.add_tree(Pine(x, y))
+
         return self.trees
 
 

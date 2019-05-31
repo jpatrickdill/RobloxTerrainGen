@@ -1,5 +1,6 @@
 class Tree(object):
     type_ = ""
+    diameter = 10 / 4
 
     def __init__(self, x, y):
         self.x = x
@@ -23,11 +24,29 @@ class Tree(object):
 
 class Palm(Tree):
     type_ = "Palm"
+    diameter = 30 / 4
 
 
 class Oak(Tree):
     type_ = "Oak"
+    diameter = 75 / 4
+
+
+class Maple(Tree):
+    type_ = "Maple"
+    diameter = 60 / 4
 
 
 class Redwood(Tree):
+    type_ = "Redwood"
+    diameter = 60 / 4
+
+
+class Pine(Tree):
     type_ = "Pine"
+    diameter = 50 / 4
+
+
+class Cactus(Tree):
+    type_ = "Cactus"
+    diameter = 6 / 4
