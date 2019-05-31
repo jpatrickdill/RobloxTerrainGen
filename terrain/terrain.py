@@ -84,9 +84,9 @@ class Layer(object):
 class Terrain(object):
     def __init__(self, dimensions, water_level=None, moisture_seed=None, modifier=None):
         self.layers = []
-        self.moisture_seed = moisture_seed or 0
 
-        self.moisture_noise = Layer(self.moisture_seed, dimensions[0]/3, 1)
+        self.moisture_seed = moisture_seed or 0
+        self.moisture_noise = OpenSimplex(self.moisture_seed)
 
         self.max_height = 0
         self.water_level = water_level or 0
@@ -128,6 +128,9 @@ class Terrain(object):
             "bounds": self.bounds
         }
 
+    def moisture_at(self, x, y):
+        return (self.moisture_noise.noise2d(x/750, y/750) + 1) / 2
+
     def add_modifier(self, func):
         self.modifiers.append(func)
 
@@ -139,7 +142,7 @@ class Terrain(object):
 
         slope = math.sqrt((nx - height) ** 2 + (ny - height) ** 2)
 
-        v = Cell(height / self.max_height, (x, y), Material.Grass, moisture=self.moisture_noise.get_pixel(x, y))
+        v = Cell(height / self.max_height, (x, y), Material.Grass, moisture=self.moisture_at(x, y))
         for func in self.modifiers:
             v = func(v, (x, y), self.config)
 
