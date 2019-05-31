@@ -1,63 +1,60 @@
 import math
-from enum import Enum
 
 from opensimplex import OpenSimplex
 
-from terrain.biomes import beach, grassland, mountain
+from terrain.material import Material
+from terrain.biomes import (Beach, Grassland, TemperateDeciduousForest, TemperateRainForest, TropicalRainForest,
+                            SeasonalForest, Snow, Bare, Taiga, Shrubland, SubtropicalDesert, TemperateDesert)
+from PIL import Image
+
+Biomes = (Beach, Grassland, TemperateDeciduousForest, TemperateRainForest, TropicalRainForest,
+          SeasonalForest, Snow, Bare, Taiga, Shrubland, SubtropicalDesert, TemperateDesert)
+
+BiomeMap = {
+    (241, 216, 169): Beach,
+    (248, 211, 126): SubtropicalDesert,
+    (251, 227, 174): TemperateDesert,
+    (224, 251, 174): Grassland,
+    (193, 243, 190): SeasonalForest,
+    (23, 125, 54): TropicalRainForest,
+    (136, 225, 111): TemperateDeciduousForest,
+    (30, 164, 70): TemperateRainForest,
+    (180, 197, 167): Shrubland,
+    (148, 198, 142): Taiga,
+    (195, 195, 195): Bare,
+    (255, 255, 255): Snow
+}
+
+BiomeImg = Image.open("./terrain/biomes/biomes.png")
+BiomeImgPix = BiomeImg.load()
 
 
-class Material(Enum):
-    Plastic = 256
-    Wood = 512
-    Slate = 800
-    Concrete = 816
-    CorrodedMetal = 1040
-    DiamondPlate = 1056
-    Foil = 1072
-    Grass = 1280
-    Ice = 1536
-    Marble = 784
-    Granite = 832
-    Brick = 848
-    Pebble = 864
-    Sand = 1296
-    Fabric = 1312
-    SmoothPlastic = 272
-    Metal = 1088
-    WoodPlanks = 528
-    Cobblestone = 880
-    Air = 1792
-    Water = 2048
-    Rock = 896
-    Glacier = 1552
-    Snow = 1328
-    Sandstone = 912
-    Mud = 1344
-    Basalt = 788
-    Ground = 1360
-    CrackedLava = 804
-    Neon = 288
-    Glass = 1568
-    Asphalt = 1376
-    LeafyGrass = 1284
-    Salt = 1392
-    Limestone = 820
-    Pavement = 836
-    ForceField = 1584
+def get_biome(cell):
+    x = int(cell.moisture * 254)
+    y = 399 - int(max(0, min(cell.height, 399)))
+
+    return BiomeMap[BiomeImgPix[x, y]]
 
 
 class Cell(object):
-    def __init__(self, height, material, moisture=1):
+    def __init__(self, height, pos, material, moisture=1):
         self.height = height
+        self.position = pos
 
         self.material = material
         self.moisture = moisture
 
+    @property
+    def biome(self):
+        return get_biome(self)
+
     def __repr__(self):
-        return "Cell({}, {}, moisture={})".format(self.height, self.material.name, self.moisture)
+        return "Cell({}, {}, moisture={}, biome={})".format(self.height, self.material.name, self.moisture,
+                                                            self.biome.__name__)
 
     def json(self, max_height=None):
-        return [self.height / max_height if max_height else self.height, self.material.value]
+        return [self.height / max_height if max_height else self.height, self.material.value,
+                self.biome.__name__, self.moisture, self.position[0], self.position[1]]
 
 
 class Layer(object):
@@ -85,6 +82,8 @@ class Terrain(object):
     def __init__(self, dimensions, water_level=None, moisture_seed=None, modifier=None):
         self.layers = []
         self.moisture_seed = moisture_seed or 0
+
+        self.moisture_noise = Layer(self.moisture_seed, dimensions[0]/3, 1)
 
         self.max_height = 0
         self.water_level = water_level or 0
@@ -137,27 +136,16 @@ class Terrain(object):
 
         slope = math.sqrt((nx - height) ** 2 + (ny - height) ** 2)
 
-        v = Cell(height / self.max_height, Material.Grass)
+        v = Cell(height / self.max_height, (x, y), Material.Grass, moisture=self.moisture_noise.get_pixel(x, y))
         for func in self.modifiers:
             v = func(v, (x, y), self.config)
 
         # convert back to height in m
         v.height = v.height * self.max_height
 
-        altitude = v.height - self.water_level
+        biome = v.biome()
 
-        # determine material
-
-        if altitude <= 6:  # beach
-            mat = Material.Sand if slope <= 0.8 else Material.Sandstone
-        elif 6 <= altitude <= self.max_height * 0.6 - 14:  # grassy
-            mat = Material.Grass if slope <= 1.125 else Material.Rock
-        else:  # snow/mountain
-            mat = Material.Snow if slope <= 0.63 else Material.Rock
-
-        # initialize height as percentage for any modifier functions
-
-        v.material = mat
+        v.material = biome.material_at(v, slope)
 
         return v
 
@@ -178,9 +166,11 @@ class Terrain(object):
 
         # get trees from each biome type
 
-        for biome in [beach, grassland, mountain]:
-            for tree in biome.get_trees(x0, y0, x1, y1):
-                trees.append(tree)
+        for biome_cls in Biomes:
+            biome = biome_cls()
+            for tree in biome(x0, y0, x1, y1):
+                if self.get_pixel(tree.x, tree.y).biome == biome_cls:
+                    trees.append(tree)
 
         i = 0
         while i < len(trees):

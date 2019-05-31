@@ -1,6 +1,3 @@
-import terrain
-
-
 class Tree(object):
     type_ = ""
 
@@ -11,7 +8,7 @@ class Tree(object):
         self.seed = (x << 16) + y
 
     def valid(self, cell):
-        return True
+        return True if cell.height > 12 else False
 
     def json(self, cell):
         return {
@@ -27,28 +24,10 @@ class Tree(object):
 class Palm(Tree):
     type_ = "Palm"
 
-    def valid(self, cell):
-        if cell.material != terrain.Material.Sand:
-            return False
-
-        return True
-
 
 class Oak(Tree):
     type_ = "Oak"
 
-    def valid(self, cell):
-        if cell.material != terrain.Material.Grass:
-            return False
 
-        return True
-
-
-class Pine(Tree):
+class Redwood(Tree):
     type_ = "Pine"
-
-    def valid(self, cell):
-        if cell.material not in [terrain.Material.Snow, terrain.Material.Grass] or cell.height < 200:
-            return False
-
-        return True

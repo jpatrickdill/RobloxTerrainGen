@@ -34,8 +34,6 @@ def get_chunk():
 
     trees = terr.get_trees(x0, y0, x1, y1)
 
-    print(trees)
-
     return jsonify({
         "height": terr.max_height,
         "water_level": terr.water_level,
