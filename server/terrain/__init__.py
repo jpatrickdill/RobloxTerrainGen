@@ -1,8 +1,5 @@
-from flask import Blueprint, request, Response, jsonify
+from flask import Blueprint, request, Response
 import sys
-import threading
-import json
-from queue import Queue
 
 from jsonrpcserver import method, dispatch
 
@@ -46,6 +43,7 @@ terrain_bp = Blueprint("terrain", __name__)
 def index():
     req = request.get_data().decode()
 
-    response = dispatch(req, trim_log_values=True)
+    response = dispatch(req, trim_log_values=True)  # why the fuck should i have to tell it to trim the log values if
+                                                    # it knows it's gonna break
 
     return Response(str(response), response.http_status, mimetype="application/json")

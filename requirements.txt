@@ -2,4 +2,3 @@ flask
 opensimplex
 click
 pillow
-jsonrpcserver
