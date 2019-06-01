@@ -42,14 +42,6 @@ def gen_chunk(config, x0, y0, x1, y1):
 terrain_bp = Blueprint("terrain", __name__)
 
 
-def dispatch_and_keep_result(req, q):
-    print(req)
-    resp = dispatch(req)
-    print("done")
-
-    q.put(resp)
-
-
 @terrain_bp.route("/", methods=["POST"])
 def index():
     req = request.get_data().decode()
