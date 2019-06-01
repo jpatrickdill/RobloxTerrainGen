@@ -46,6 +46,6 @@ terrain_bp = Blueprint("terrain", __name__)
 def index():
     req = request.get_data().decode()
 
-    response = dispatch(req)
+    response = dispatch(req, trim_log_values=True)
 
     return Response(str(response), response.http_status, mimetype="application/json")
