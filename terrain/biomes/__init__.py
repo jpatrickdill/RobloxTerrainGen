@@ -100,7 +100,16 @@ class TemperateRainForest(Biome):
         return Material.Grass if slope <= 0.85 else Material.Rock
 
     def __call__(self, x0, y0, x1, y1):
-        for (x, y) in get_positions(x0, y0, x1, y1, 34, "oaks"):
+        for (x, y) in get_positions(x0, y0, x1, y1, 68, "coastaldouglasfirs"):
+            self.add_tree(CoastalDouglasFir(x, y))
+
+        for (x, y) in get_positions(x0, y0, x1, y1, 35, "northernconifer"):
+            self.add_tree(NorthernConifer(x, y))
+
+        for (x, y) in get_positions(x0, y0, x1, y1, 35, "vinemaples"):
+            self.add_tree(VineMaple(x, y))
+
+        for (x, y) in get_positions(x0, y0, x1, y1, 60, "oaks"):
             self.add_tree(Oak(x, y))
 
         return self.trees

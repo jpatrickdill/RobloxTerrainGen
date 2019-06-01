@@ -37,8 +37,23 @@ class Maple(Tree):
     diameter = 60 / 4
 
 
+class VineMaple(Tree):
+    type_ = "VineMaple"
+    diameter = 67 / 4
+
+
 class Redwood(Tree):
     type_ = "Redwood"
+    diameter = 50 / 4
+
+
+class CoastalDouglasFir(Tree):
+    type_ = "CoastalDouglasFir"
+    diameter = 50 / 4
+
+
+class NorthernConifer(Tree):
+    type_ = "NorthernConifer"
     diameter = 60 / 4
 
 
