@@ -53,27 +53,7 @@ def dispatch_and_keep_result(req, q):
 @terrain_bp.route("/", methods=["POST"])
 def index():
     req = request.get_data().decode()
-    js = json.loads(req)
 
-    print(req)
+    response = dispatch(req)
 
-    if type(js) == list:
-        responses = Queue()
-        threads = []
-        for req2 in js:
-            t = threading.Thread(target=dispatch_and_keep_result, args=(json.dumps(req2), responses))
-            threads.append(t)
-
-            t.start()
-
-        [t.join() for t in threads]
-
-        responses = list(responses.queue)
-        responses = [response.deserialized() for response in responses]
-
-        return jsonify(responses)
-
-    else:
-        response = dispatch(req)
-
-        return Response(str(response), response.http_status, mimetype="application/json")
+    return Response(str(response), response.http_status, mimetype="application/json")
