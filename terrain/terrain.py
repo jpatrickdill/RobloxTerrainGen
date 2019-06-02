@@ -28,21 +28,23 @@ BiomeMap = {
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-BiomeImg = Image.open(dir_path+"/biomes/biomes.png")
+BiomeImg = Image.open(dir_path + "/biomes/biomes.png")
 BiomeImgPix = BiomeImg.load()
 
 
 def get_biome(cell):
     x = int(cell.moisture * 254)
-    y = 399 - int(max(0, min(cell.height, 399)))
+    y = 399 - int(max(0, min(cell.height - cell.water_level, 399)))
 
     return BiomeMap[BiomeImgPix[x, y]]
 
 
 class Cell(object):
-    def __init__(self, height, pos, material, moisture=1):
+    def __init__(self, height, pos, material, moisture=1, water_level=0):
         self.height = height
         self.position = pos
+
+        self.water_level = water_level
 
         self.material = material
         self.moisture = moisture
@@ -56,8 +58,16 @@ class Cell(object):
                                                             self.biome.__name__)
 
     def json(self, max_height=None):
-        return [self.height / max_height if max_height else self.height, self.material.value,
-                self.biome.Name, self.moisture, self.position[0], self.position[1]]
+        return {
+            "height": self.height / max_height if max_height else self.height,
+            "altitude": self.height - self.water_level,
+            "x": self.position[0],
+            "z": self.position[1],
+            "material": self.material.value,
+            "biome": self.biome.Name,
+            "moisture": self.moisture,
+            "water_level": self.water_level
+        }
 
 
 class Layer(object):
@@ -129,7 +139,7 @@ class Terrain(object):
         }
 
     def moisture_at(self, x, y):
-        return (self.moisture_noise.noise2d(x/750, y/750) + 1) / 2
+        return (self.moisture_noise.noise2d(x / 750, y / 750) + 1) / 2
 
     def add_modifier(self, func):
         self.modifiers.append(func)
@@ -142,7 +152,10 @@ class Terrain(object):
 
         slope = math.sqrt((nx - height) ** 2 + (ny - height) ** 2)
 
-        v = Cell(height / self.max_height, (x, y), Material.Grass, moisture=self.moisture_at(x, y))
+        v = Cell(height / self.max_height, (x, y), Material.Grass,
+                 moisture=self.moisture_at(x, y),
+                 water_level=self.water_level)
+
         for func in self.modifiers:
             v = func(v, (x, y), self.config)
 
