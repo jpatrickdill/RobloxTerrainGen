@@ -28,7 +28,7 @@ BiomeMap = {
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-BiomeImg = Image.open(dir_path + "/biomes/biomes.png")
+BiomeImg = Image.open(dir_path + "/biomes/biomes.bmp")
 BiomeImgPix = BiomeImg.load()
 
 
