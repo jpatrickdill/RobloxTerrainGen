@@ -36,7 +36,7 @@ def get_biome(cell):
     x = int(cell.moisture * 254)
     y = 399 - int(max(0, min(cell.height - cell.water_level, 399)))
 
-    return BiomeMap[BiomeImgPix[x, y]]
+    return BiomeMap.get(BiomeImgPix[x, y], Grassland)
 
 
 class Cell(object):
