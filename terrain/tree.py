@@ -27,9 +27,19 @@ class Palm(Tree):
     diameter = 30 / 4
 
 
+class QuakingAspen(Tree):
+    type_ = "QuakingAspen"
+    diameter = 30 / 4
+
+
 class Oak(Tree):
     type_ = "Oak"
     diameter = 75 / 4
+
+
+class Sycamore(Tree):
+    type_ = "AmericanSycamore"
+    diameter = 60 / 4
 
 
 class Maple(Tree):
