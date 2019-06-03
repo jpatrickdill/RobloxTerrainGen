@@ -68,10 +68,10 @@ class Grassland(Biome):
         return Material.Grass if slope <= 0.93 else Material.Rock
 
     def __call__(self, x0, y0, x1, y1):
-        for (x, y) in get_positions(x0, y0, x1, y1, 86, "oaks"):
+        for (x, y) in get_positions(x0, y0, x1, y1, 160, "oaks"):
             self.add_tree(Oak(x, y))
 
-        for (x, y) in get_positions(x0, y0, x1, y1, 84, "palms"):
+        for (x, y) in get_positions(x0, y0, x1, y1, 160, "palms"):
             self.add_tree(Palm(x, y))
 
         return self.trees
@@ -90,11 +90,11 @@ class TemperateDeciduousForest(Biome):
         for (x, y) in get_positions(x0, y0, x1, y1, int(60*0.6), "aspens"):
             self.add_tree(QuakingAspen(x, y))
 
-        for (x, y) in get_positions(x0, y0, x1, y1, int(52*0.6), "sycamores"):
-            self.add_tree(Sycamore(x, y))
-
         for (x, y) in get_positions(x0, y0, x1, y1, int(36*0.6), "oaks"):
             self.add_tree(Oak(x, y))
+
+        for (x, y) in get_positions(x0, y0, x1, y1, int(52*0.6), "sycamores"):
+            self.add_tree(Sycamore(x, y))
 
         return self.trees
 
