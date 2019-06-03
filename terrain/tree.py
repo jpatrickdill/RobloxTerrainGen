@@ -34,7 +34,7 @@ class QuakingAspen(Tree):
 
 class Oak(Tree):
     type_ = "Oak"
-    diameter = 75 / 4
+    diameter = 60 / 4
 
 
 class Sycamore(Tree):
